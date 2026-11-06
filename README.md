@@ -102,6 +102,8 @@ It prints what it found and how many descriptions agree with the [hand-written a
 
 ### Through a connector (costs money)
 
+I have tested the server over HTTP on my own machine, and the request's shape against the docs, but I have not run these steps through a tunnel from Anthropic's cloud. Treat them as a starting point.
+
 Anthropic's cloud has to reach the server, so it needs a public URL. A tunnel gives you one. With [cloudflared](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/):
 
 ```bash
