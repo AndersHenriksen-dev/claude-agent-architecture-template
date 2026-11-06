@@ -1,0 +1,46 @@
+# A made-up bank statement: three months for a made-up person. Every merchant name is invented.
+# Amounts are strings, because YAML would read 99.10 as a float. Negative means money out.
+#
+# What is in it on purpose:
+# - Viewly, Tunebox, FitZone, CloudVault: active subscriptions, each written differently from month to month.
+# - Viewly goes from 99.00 to 119.00 in October: a price rise.
+# - NewsDaily stops after September: a subscription that has already ended.
+# - Rent and the phone bill recur but are not subscriptions. Groceries repeat but vary. The salary is money in.
+account_holder: Sam Testperson
+currency: DKK
+transactions:
+  - { id: T01, date: 2026-08-01, description: "HUSLEJE BOLIGSELSK 8821", amount: "-7800.00" }
+  - { id: T02, date: 2026-08-01, description: "FITZONE CPH DD 44120", amount: "-249.00" }
+  - { id: T03, date: 2026-08-03, description: "VIEWLY.COM 8437 DUBLIN", amount: "-99.00" }
+  - { id: T04, date: 2026-08-05, description: "KVICKMARKED 221 NORD", amount: "-412.35" }
+  - { id: T05, date: 2026-08-07, description: "TUNEBOX P2F3A1", amount: "-109.00" }
+  - { id: T06, date: 2026-08-09, description: "CLDVAULT.IO STORAGE", amount: "-29.00" }
+  - { id: T07, date: 2026-08-11, description: "NEWSDAILY DIGITAL", amount: "-79.00" }
+  - { id: T08, date: 2026-08-12, description: "KVICKMARKED 118 HAVN", amount: "-287.10" }
+  - { id: T09, date: 2026-08-15, description: "TELINO MOBIL 22334455", amount: "-149.00" }
+  - { id: T10, date: 2026-08-18, description: "HARBOUR LANE COFFEE", amount: "-58.00" }
+  - { id: T11, date: 2026-08-22, description: "NORDRAIL TICKET 7731", amount: "-322.00" }
+  - { id: T12, date: 2026-08-25, description: "KVICKMARKED 221 NORD", amount: "-501.75" }
+  - { id: T13, date: 2026-08-28, description: "LOEN NORDLYS APS", amount: "32000.00" }
+  - { id: T14, date: 2026-09-01, description: "HUSLEJE BOLIGSELSK 8821", amount: "-7800.00" }
+  - { id: T15, date: 2026-09-01, description: "FITZONE CPH DD 45871", amount: "-249.00" }
+  - { id: T16, date: 2026-09-03, description: "VIEWLY *MONTHLY", amount: "-99.00" }
+  - { id: T17, date: 2026-09-04, description: "BOGHANDLEN NORD", amount: "-189.95" }
+  - { id: T18, date: 2026-09-07, description: "TNBX*PREMIUM", amount: "-109.00" }
+  - { id: T19, date: 2026-09-09, description: "CLOUDVAULT BACKUP", amount: "-29.00" }
+  - { id: T20, date: 2026-09-11, description: "NEWSDAILY.DK ABO", amount: "-79.00" }
+  - { id: T21, date: 2026-09-13, description: "KVICKMARKED 118 HAVN", amount: "-356.40" }
+  - { id: T22, date: 2026-09-15, description: "TELINO MOBIL 22334455", amount: "-149.00" }
+  - { id: T23, date: 2026-09-20, description: "KVICKMARKED 221 NORD", amount: "-444.20" }
+  - { id: T24, date: 2026-09-24, description: "HARBOUR LANE COFFEE", amount: "-64.50" }
+  - { id: T25, date: 2026-09-28, description: "LOEN NORDLYS APS", amount: "32000.00" }
+  - { id: T26, date: 2026-10-01, description: "HUSLEJE BOLIGSELSK 8821", amount: "-7800.00" }
+  - { id: T27, date: 2026-10-01, description: "FITZONE CPH DD 47102", amount: "-249.00" }
+  - { id: T28, date: 2026-10-03, description: "VIEWLY.COM/BILL IE", amount: "-119.00" }
+  - { id: T29, date: 2026-10-06, description: "KVICKMARKED 221 NORD", amount: "-398.65" }
+  - { id: T30, date: 2026-10-07, description: "TUNEBOX AB STHLM", amount: "-109.00" }
+  - { id: T31, date: 2026-10-09, description: "CLDVAULT.IO STORAGE", amount: "-29.00" }
+  - { id: T32, date: 2026-10-15, description: "TELINO MOBIL 22334455", amount: "-149.00" }
+  - { id: T33, date: 2026-10-17, description: "KVICKMARKED 118 HAVN", amount: "-310.80" }
+  - { id: T34, date: 2026-10-21, description: "NORDRAIL TICKET 8120", amount: "-322.00" }
+  - { id: T35, date: 2026-10-28, description: "LOEN NORDLYS APS", amount: "32000.00" }
