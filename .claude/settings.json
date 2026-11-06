@@ -4,7 +4,10 @@
       "Bash(uv run pytest:*)",
       "Bash(uv run ruff:*)",
       "Bash(uv run mypy:*)",
-      "Bash(uv run subfinder demo:*)"
+      "Bash(uv run subfinder demo:*)",
+      "mcp__subfinder__list_transactions",
+      "mcp__subfinder__get_merchant",
+      "mcp__subfinder__get_summary"
     ],
     "ask": [
       "Bash(uv run subfinder run:*)",
@@ -32,6 +35,41 @@
             "command": "uv run --no-project python \"$CLAUDE_PROJECT_DIR/.claude/hooks/check_python_style_read.py\"",
             "timeout": 15,
             "statusMessage": "Checking python-style.md was read..."
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__subfinder__tag_subscription|mcp__subfinder__save_summary",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "uv run --quiet --project \"$CLAUDE_PROJECT_DIR\" python -m subfinder.lib.hooks pre-tool-use",
+            "timeout": 30,
+            "onFailure": "block",
+            "statusMessage": "Checking the write against the statement..."
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "mcp__subfinder__.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "uv run --quiet --project \"$CLAUDE_PROJECT_DIR\" python -m subfinder.lib.hooks post-tool-use",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "uv run --quiet --project \"$CLAUDE_PROJECT_DIR\" python -m subfinder.lib.hooks stop",
+            "timeout": 30
           }
         ]
       }

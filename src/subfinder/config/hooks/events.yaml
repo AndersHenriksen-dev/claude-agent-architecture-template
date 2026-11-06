@@ -1,0 +1,7 @@
+# Claude Code names an MCP tool mcp__<server>__<tool>. The server name is the key in .mcp.json.
+tool_prefix: mcp__subfinder__
+
+# What the model is told when it tries to finish a run that has tags but no summary.
+stop_reason: >-
+  Subscriptions are tagged but no summary is saved. Call save_summary before finishing.
+  If this run should be abandoned, say so and ask the user to run `uv run subfinder reset`.
