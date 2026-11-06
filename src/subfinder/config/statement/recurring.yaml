@@ -1,0 +1,2 @@
+# A merchant counts as recurring once it has charged in this many different months.
+min_months: 2
