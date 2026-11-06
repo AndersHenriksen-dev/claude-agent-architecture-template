@@ -1,0 +1,4 @@
+path: /mcp
+default_port: 8765
+# Serve on this machine only. A tunnel or a reverse proxy is what makes it public, on purpose.
+host: 127.0.0.1
