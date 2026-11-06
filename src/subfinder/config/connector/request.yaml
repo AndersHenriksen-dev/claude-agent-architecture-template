@@ -1,0 +1,16 @@
+server_name: subfinder
+max_tokens: 16000
+effort: low
+
+# mcp-client-2025-11-20 is the MCP connector. server-side-fallback-2026-07-01 goes with fallbacks: "default".
+betas:
+  - mcp-client-2025-11-20
+  - server-side-fallback-2026-07-01
+fallbacks: default
+
+# The server may run more than one tool in a request and ask to be resumed. This caps how often we do that.
+max_resumes: 3
+
+system: >-
+  You answer questions about a made-up bank statement in DKK, using the subfinder tools. Say what the statement shows
+  and what a change would save. The choice to keep or cancel something is the account holder's, so do not advise it.

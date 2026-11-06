@@ -52,7 +52,7 @@ def _add_write_tools(server: MCPServer) -> None:
 
 def build_server() -> MCPServer:
     """The full server: every tool, for a client that runs on this machine with your hooks around it."""
-    server = MCPServer(CONFIG.name, instructions=CONFIG.instructions)
+    server = MCPServer(CONFIG.name, instructions=CONFIG.instructions, log_level="WARNING")
     add_read_tools(server)
     _add_write_tools(server)
     return server

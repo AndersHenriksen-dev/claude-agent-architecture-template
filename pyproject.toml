@@ -8,10 +8,13 @@ license = "MIT"
 authors = [{ name = "Anders Henriksen", email = "anhenr.dev@gmail.com" }]
 dependencies = [
     "anthropic>=2.6",
+    "anyio>=4.0",
     "mcp>=2.3",
     "pydantic>=2.9",
     "python-dotenv>=1.0",
     "pyyaml>=6.0",
+    "starlette>=1.0",
+    "uvicorn>=0.30",
 ]
 
 [project.scripts]
@@ -19,6 +22,7 @@ subfinder = "subfinder.cli:main"
 
 [dependency-groups]
 dev = [
+    "httpx2>=0.1",
     "mypy>=1.13",
     "pre-commit>=4.0",
     "pytest>=8.3",
@@ -63,3 +67,5 @@ strict_equality = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+# Test folders mirror lib/, so two test files can share a name.
+addopts = "--import-mode=importlib"
