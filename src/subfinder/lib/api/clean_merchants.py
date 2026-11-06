@@ -7,7 +7,9 @@ agent: nothing here chooses what to do next. Everything after it is arithmetic.
 from __future__ import annotations
 
 import json
-from typing import Literal, Protocol
+from collections.abc import Callable
+from dataclasses import dataclass
+from typing import Literal
 
 import anthropic
 
@@ -32,20 +34,17 @@ class CleanedLines(Strict):
     lines: list[CleanedLine]
 
 
-class Cleaning(Strict):
-    """What a cleaner produced, and the tokens it spent. A scripted cleaner spends none."""
+@dataclass(frozen=True)
+class Cleaning:
+    """What a cleaner produced, and the tokens it spent. The hand-written answer spends none."""
 
     lines: list[CleanedLine]
     input_tokens: int = 0
     output_tokens: int = 0
 
 
-class MerchantCleaner(Protocol):
-    """Anything that can clean descriptions: Claude, or the scripted cleaner in the demo and the tests."""
-
-    def clean(self, descriptions: list[str]) -> Cleaning:
-        """Clean each description."""
-        ...
+MerchantCleaner = Callable[[list[str]], Cleaning]
+"""Anything that can clean descriptions: Claude, or the hand-written answer in the demo and the tests."""
 
 
 def _check_every_line_came_back(descriptions: list[str], lines: list[CleanedLine]) -> None:
@@ -56,36 +55,36 @@ def _check_every_line_came_back(descriptions: list[str], lines: list[CleanedLine
         raise ValueError(f"The model did not clean these lines: {missing}")
 
 
-class ClaudeCleaner:
-    """Cleans descriptions with one Messages API call. This costs money."""
+def clean_with_claude(client: anthropic.Anthropic, descriptions: list[str]) -> Cleaning:
+    """Send every description in one request. This costs money.
 
-    def __init__(self, client: anthropic.Anthropic) -> None:
-        """Keep the client. Tests pass a stand-in here, because the model is a boundary they must not cross."""
-        self._client = client
+    Args:
+        client: The API client. Tests pass a stand-in, because the model is a boundary they must not cross.
+        descriptions: The raw statement descriptions.
 
-    def clean(self, descriptions: list[str]) -> Cleaning:
-        """Send every description in one request.
+    Returns:
+        A clean merchant and category for each description, and the tokens spent.
 
-        Raises:
-            ValueError: If the model refused, or left out a line.
-        """
-        response = self._client.beta.messages.parse(
-            model=model_from_env(),
-            max_tokens=CONFIG.max_tokens,
-            system=CONFIG.system,
-            messages=[{"role": "user", "content": json.dumps(descriptions, indent=0)}],
-            output_format=CleanedLines,
-            output_config={"effort": CONFIG.effort},
-            betas=CONFIG.betas,
-            fallbacks=CONFIG.fallbacks,
-        )
-        # A refusal is a normal HTTP 200, so it has to be checked for before reading the answer.
-        if response.stop_reason == "refusal" or response.parsed_output is None:
-            raise ValueError(f"The model gave no usable answer (stop_reason: {response.stop_reason}).")
-        lines = response.parsed_output.lines
-        _check_every_line_came_back(descriptions, lines)
-        return Cleaning(
-            lines=lines,
-            input_tokens=response.usage.input_tokens,
-            output_tokens=response.usage.output_tokens,
-        )
+    Raises:
+        ValueError: If the model refused, or left out a line.
+    """
+    response = client.beta.messages.parse(
+        model=model_from_env(),
+        max_tokens=CONFIG.max_tokens,
+        system=CONFIG.system,
+        messages=[{"role": "user", "content": json.dumps(descriptions, indent=0)}],
+        output_format=CleanedLines,
+        output_config={"effort": CONFIG.effort},
+        betas=CONFIG.betas,
+        fallbacks=CONFIG.fallbacks,
+    )
+    # A refusal is a normal HTTP 200, so it has to be checked for before reading the answer.
+    if response.stop_reason == "refusal" or response.parsed_output is None:
+        raise ValueError(f"The model gave no usable answer (stop_reason: {response.stop_reason}).")
+    lines = response.parsed_output.lines
+    _check_every_line_came_back(descriptions, lines)
+    return Cleaning(
+        lines=lines,
+        input_tokens=response.usage.input_tokens,
+        output_tokens=response.usage.output_tokens,
+    )

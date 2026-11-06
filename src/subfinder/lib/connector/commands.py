@@ -46,6 +46,9 @@ def cmd_ask(url: str, question: str, yes: bool) -> int:
     Returns:
         The exit code.
     """
+    if not url.startswith("https://"):
+        print("The URL must start with https://, because the request sends the token to it.")
+        return 2
     print(f"Plan: 1 question on {model_from_env()} through the connector at {url}, usually a few cents or less.")
     if not yes:
         print("That costs money, so nothing was sent. Add --yes to run it.")

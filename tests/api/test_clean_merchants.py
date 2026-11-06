@@ -8,10 +8,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from subfinder.lib.api.clean_merchants import ClaudeCleaner, CleanedLines
-from subfinder.lib.api.scripted import ScriptedCleaner, count_agreeing
+from subfinder.lib.api.clean_merchants import CleanedLines, clean_with_claude
 from subfinder.lib.statement.recurring import CleanedLine
-from subfinder.lib.statement.transactions import STATEMENT
 
 LINE = CleanedLine(description="VIEWLY *MONTHLY", merchant="Viewly", category="subscription")
 
@@ -26,10 +24,10 @@ def _client(stop_reason: str = "end_turn", parsed: CleanedLines | None = None) -
     return client
 
 
-class TestClaudeCleaner:
+class TestCleanWithClaude:
     def _request(self) -> dict[str, Any]:
         client = _client(parsed=CleanedLines(lines=[LINE]))
-        ClaudeCleaner(client).clean(["VIEWLY *MONTHLY"])
+        clean_with_claude(client, ["VIEWLY *MONTHLY"])
         return client.beta.messages.parse.call_args.kwargs
 
     def test_asks_for_the_structured_shape(self) -> None:
@@ -55,30 +53,13 @@ class TestClaudeCleaner:
         assert "server-side-fallback-2026-07-01" in request["betas"]
 
     def test_reports_tokens(self) -> None:
-        cleaning = ClaudeCleaner(_client(parsed=CleanedLines(lines=[LINE]))).clean(["VIEWLY *MONTHLY"])
+        cleaning = clean_with_claude(_client(parsed=CleanedLines(lines=[LINE])), ["VIEWLY *MONTHLY"])
         assert (cleaning.input_tokens, cleaning.output_tokens) == (100, 20)
 
     def test_a_refusal_is_an_error(self) -> None:
         with pytest.raises(ValueError, match="refusal"):
-            ClaudeCleaner(_client(stop_reason="refusal")).clean(["VIEWLY *MONTHLY"])
+            clean_with_claude(_client(stop_reason="refusal"), ["VIEWLY *MONTHLY"])
 
     def test_a_line_left_out_is_an_error(self) -> None:
         with pytest.raises(ValueError, match="TUNEBOX"):
-            ClaudeCleaner(_client(parsed=CleanedLines(lines=[LINE]))).clean(["VIEWLY *MONTHLY", "TUNEBOX P2F3A1"])
-
-
-class TestScriptedCleaner:
-    def test_covers_every_description_on_the_statement(self) -> None:
-        descriptions = sorted({line.description for line in STATEMENT.transactions})
-        assert {line.description for line in ScriptedCleaner().clean(descriptions).lines} == set(descriptions)
-
-    def test_spends_no_tokens(self) -> None:
-        assert ScriptedCleaner().clean(["VIEWLY *MONTHLY"]).input_tokens == 0
-
-    def test_agreement_ignores_case_and_spaces_in_the_merchant(self) -> None:
-        same = CleanedLine(description="HARBOUR LANE COFFEE", merchant="harbourlane COFFEE", category="other")
-        assert count_agreeing([same]) == 1
-
-    def test_agreement_counts_a_wrong_category_as_wrong(self) -> None:
-        wrong = CleanedLine(description="VIEWLY *MONTHLY", merchant="Viewly", category="other")
-        assert count_agreeing([wrong]) == 0
+            clean_with_claude(_client(parsed=CleanedLines(lines=[LINE])), ["VIEWLY *MONTHLY", "TUNEBOX P2F3A1"])

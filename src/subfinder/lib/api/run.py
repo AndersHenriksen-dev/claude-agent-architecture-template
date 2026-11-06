@@ -5,18 +5,19 @@ Hooks only exist inside Claude Code. Here nothing would run them, so this code c
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from decimal import Decimal
 
 from subfinder.lib.api.clean_merchants import Cleaning, MerchantCleaner
 from subfinder.lib.hooks.checks import Decision, check_summary, check_tag
-from subfinder.lib.shared.settings import Strict
-from subfinder.lib.statement.recurring import Recurring, find_recurring
+from subfinder.lib.statement.recurring import RULES, Recurring, find_recurring
 from subfinder.lib.statement.tools import save_summary, tag_subscription
 from subfinder.lib.statement.transactions import STATEMENT
 from subfinder.lib.statement.workbook import Summary, SummaryLine, Tag, load_workbook, reset_workbook
 
 
-class RunResult(Strict):
+@dataclass(frozen=True)
+class RunResult:
     """What a run found."""
 
     cleaning: Cleaning
@@ -31,7 +32,7 @@ def _require(decision: Decision) -> None:
 
 def tag_checked(tag: Tag) -> None:
     """Save a tag if its check passes."""
-    _require(check_tag(tag, STATEMENT))
+    _require(check_tag(tag, load_workbook().tags, STATEMENT))
     tag_subscription(tag.merchant, tag.transaction_ids)
 
 
@@ -55,11 +56,11 @@ def build_summary(active: list[Recurring]) -> Summary:
     return Summary(lines=lines, total_monthly_saving=total)
 
 
-def find_and_save(cleaner: MerchantCleaner) -> RunResult:
+def find_and_save(clean: MerchantCleaner) -> RunResult:
     """Run the whole job once, starting from an empty workbook.
 
     Args:
-        cleaner: Claude for a paid run, or the scripted cleaner for a free one.
+        clean: Claude for a paid run, or the hand-written answer for a free one.
 
     Returns:
         The cleaning, every subscription found, and the summary that was saved.
@@ -69,8 +70,8 @@ def find_and_save(cleaner: MerchantCleaner) -> RunResult:
     """
     reset_workbook()
     descriptions = sorted({line.description for line in STATEMENT.transactions})
-    cleaning = cleaner.clean(descriptions)
-    recurring = find_recurring(STATEMENT.transactions, cleaning.lines)
+    cleaning = clean(descriptions)
+    recurring = find_recurring(STATEMENT.transactions, cleaning.lines, RULES)
     active = [item for item in recurring if item.active]
     for item in active:
         tag_checked(Tag(merchant=item.merchant, transaction_ids=item.transaction_ids))

@@ -71,7 +71,7 @@ To deny with a reason the model can act on:
 
 ## The three hooks here
 
-**`PreToolUse`: check the write.** A tag must point at real outgoing lines. A summary line must name a tagged merchant and save no more than its latest charge, no merchant may appear twice, and the total must add up. All the problems go back in one reason, so the model can fix them in one try.
+**`PreToolUse`: check the write.** A tag must point at real outgoing lines that no other merchant has claimed. A summary line must name a tagged merchant, must not be negative, and must save no more than its latest charge. A subscription that has already ended saves nothing, no merchant may appear twice, and the total must add up. All the problems go back in one reason, so the model can fix them in one try.
 
 Because this hook stands in front of a write, it **fails closed**. An unreadable event or arguments that do not parse are denied. `onFailure: block` covers the hook not running at all, for example if `uv` is missing.
 

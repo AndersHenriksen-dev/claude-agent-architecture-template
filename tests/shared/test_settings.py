@@ -24,7 +24,9 @@ def test_config_path_mirrors_the_module() -> None:
 
 def test_a_misspelled_key_fails(tmp_path: Path) -> None:
     file = tmp_path / "settings.yaml"
-    file.write_text("model: m\nprices: {}\nworkspace_dir: w\nmodle: typo\n", encoding="utf-8")
+    file.write_text(
+        "model: m\nprices: {}\nworkspace_dir: w\nworkbook_file: a\naudit_file: b\nmodle: typo\n", encoding="utf-8"
+    )
     with pytest.raises(ValidationError):
         read_config(file, Settings)
 

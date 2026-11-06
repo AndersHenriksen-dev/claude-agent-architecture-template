@@ -9,3 +9,5 @@ prices:
 
 # Relative to the repo root. Git-ignored.
 workspace_dir: workspace
+workbook_file: workbook.json
+audit_file: audit.jsonl

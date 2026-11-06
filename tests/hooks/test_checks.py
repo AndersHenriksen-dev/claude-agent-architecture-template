@@ -23,20 +23,31 @@ def _summary(*lines: tuple[str, str], total: str) -> Summary:
 
 class TestCheckTag:
     def test_allows_real_charges(self) -> None:
-        assert check_tag(VIEWLY, STATEMENT).allowed
+        assert check_tag(VIEWLY, [], STATEMENT).allowed
 
     def test_denies_an_id_that_is_not_on_the_statement(self) -> None:
-        decision = check_tag(Tag(merchant="Ghost", transaction_ids=["T99"]), STATEMENT)
+        decision = check_tag(Tag(merchant="Ghost", transaction_ids=["T99"]), [], STATEMENT)
         assert not decision.allowed
         assert "T99" in decision.reason
 
     def test_denies_money_in(self) -> None:
-        decision = check_tag(Tag(merchant="Salary", transaction_ids=["T13"]), STATEMENT)
+        decision = check_tag(Tag(merchant="Salary", transaction_ids=["T13"]), [], STATEMENT)
         assert not decision.allowed
         assert "money in" in decision.reason
 
     def test_denies_a_tag_with_no_charges(self) -> None:
-        assert not check_tag(Tag(merchant="Empty", transaction_ids=[]), STATEMENT).allowed
+        assert not check_tag(Tag(merchant="Empty", transaction_ids=[]), [], STATEMENT).allowed
+
+    def test_denies_a_charge_already_tagged_under_another_name(self) -> None:
+        decision = check_tag(Tag(merchant="Viewly Again", transaction_ids=["T28"]), [VIEWLY], STATEMENT)
+        assert not decision.allowed
+        assert "T28" in decision.reason
+
+    def test_allows_tagging_the_same_merchant_again(self) -> None:
+        assert check_tag(VIEWLY, [VIEWLY], STATEMENT).allowed
+
+    def test_denies_the_same_charge_twice_in_one_tag(self) -> None:
+        assert not check_tag(Tag(merchant="Viewly", transaction_ids=["T03", "T03"]), [], STATEMENT).allowed
 
 
 class TestCheckSummary:
@@ -65,6 +76,22 @@ class TestCheckSummary:
     def test_denies_a_merchant_counted_twice(self) -> None:
         summary = _summary(("Viewly", "119.00"), ("Viewly", "119.00"), total="238.00")
         assert not check_summary(summary, [VIEWLY], STATEMENT).allowed
+
+    def test_denies_a_negative_saving(self) -> None:
+        decision = check_summary(_summary(("Viewly", "-500.00"), total="-500.00"), [VIEWLY], STATEMENT)
+        assert not decision.allowed
+        assert "negative" in decision.reason
+
+    def test_denies_a_saving_on_a_subscription_that_has_ended(self) -> None:
+        news = Tag(merchant="NewsDaily", transaction_ids=["T07", "T20"])
+        decision = check_summary(_summary(("NewsDaily", "79.00"), total="79.00"), [news], STATEMENT)
+        assert not decision.allowed
+        assert "ended" in decision.reason
+
+    def test_denies_a_tag_with_no_real_charges(self) -> None:
+        ghost = Tag(merchant="Ghost", transaction_ids=["T99"])
+        decision = check_summary(_summary(("Ghost", "0.00"), total="0.00"), [ghost], STATEMENT)
+        assert not decision.allowed
 
     def test_names_every_problem_at_once(self) -> None:
         decision = check_summary(_summary(("Viewly", "999.00"), total="1.00"), [VIEWLY], STATEMENT)

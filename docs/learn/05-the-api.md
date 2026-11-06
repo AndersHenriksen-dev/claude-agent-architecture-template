@@ -72,11 +72,11 @@ No Claude Code means no hooks. If a rule must hold here, your code has to apply 
 
 ## Testing without paying
 
-The client is a boundary. Tests replace it with a stand-in and check two things: the request has the right shape, and each kind of answer is read correctly. For runs from end to end, `ScriptedCleaner` answers from a hand-written file, and a paid run is compared with that same file, which gives a simple score.
+The client is a boundary. Tests replace it with a stand-in and check two things: the request has the right shape, and each kind of answer is read correctly. For runs from end to end, `clean_from_reference()` answers from a hand-written file, and a paid run is compared with that same file, which gives a simple score.
 
 ## Where to find this in the code
 
-- The call: `ClaudeCleaner.clean()` in [clean_merchants.py](../../src/subfinder/lib/api/clean_merchants.py), and its prompt in [clean_merchants.yaml](../../src/subfinder/config/api/clean_merchants.yaml).
+- The call: `clean_with_claude()` in [clean_merchants.py](../../src/subfinder/lib/api/clean_merchants.py), and its prompt in [clean_merchants.yaml](../../src/subfinder/config/api/clean_merchants.yaml).
 - The run with no Claude Code: `find_and_save()` in [run.py](../../src/subfinder/lib/api/run.py).
 - The arithmetic: `find_recurring()` in [recurring.py](../../src/subfinder/lib/statement/recurring.py).
 - The correct answer by hand: [scripted.yaml](../../src/subfinder/config/api/scripted.yaml).

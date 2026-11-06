@@ -52,7 +52,7 @@ Some people call a blocking hook a **guard** or a guardrail. The Claude docs do 
 
 **In the example.** [settings.json](../.claude/settings.json) wires three events to [events.py](../src/subfinder/lib/hooks/events.py):
 
-- `PreToolUse` runs the [checks](../src/subfinder/lib/hooks/checks.py). It denies a tag of a charge that is not on the statement, and a summary that claims more than the latest charge. It fails closed.
+- `PreToolUse` runs the [checks](../src/subfinder/lib/hooks/checks.py). It denies a tag of a charge that is not on the statement or already belongs to another merchant, and a summary that claims more than cancelling would save. It fails closed.
 - `PostToolUse` writes the audit log.
 - `Stop` sends the model back if a run has tags but no summary.
 

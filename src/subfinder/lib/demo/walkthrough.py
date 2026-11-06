@@ -18,7 +18,7 @@ from typing import Any
 import anyio
 from mcp import Client, StdioServerParameters
 
-from subfinder.lib.api.scripted import ScriptedCleaner
+from subfinder.lib.api.scripted import clean_from_reference
 from subfinder.lib.connector.request import build_request
 from subfinder.lib.connector.server import build_app, serving_in_background
 from subfinder.lib.demo.project_files import (
@@ -28,13 +28,13 @@ from subfinder.lib.demo.project_files import (
     skill_files,
     subfolder_instruction_files,
 )
-from subfinder.lib.shared.settings import REPO_ROOT, workspace_dir
-from subfinder.lib.statement.recurring import Recurring, find_recurring
+from subfinder.lib.hooks.events import CONFIG as HOOKS
+from subfinder.lib.shared.settings import REPO_ROOT, audit_log_path
+from subfinder.lib.statement.recurring import RULES, Recurring, find_recurring
 from subfinder.lib.statement.transactions import STATEMENT
 from subfinder.lib.statement.workbook import load_workbook
 
 _SAMPLE_FILE = "src/subfinder/lib/statement/recurring.py"
-_TOOL = "mcp__subfinder__{}"
 
 
 def _heading(text: str) -> None:
@@ -78,12 +78,12 @@ def _show_skill() -> None:
 def _clean_with_scripted_model() -> list[Recurring]:
     _heading("API: one Messages API call cleans the names (scripted here: `subfinder run` calls Claude)")
     descriptions = sorted({line.description for line in STATEMENT.transactions})
-    lines = ScriptedCleaner().clean(descriptions).lines
+    lines = clean_from_reference(descriptions).lines
     print(f"  {len(STATEMENT.transactions)} statement lines, {len(descriptions)} different descriptions")
     for line in lines:
         if line.merchant == "Viewly":
             print(f"  {line.description!r} -> {line.merchant} ({line.category})")
-    recurring = find_recurring(STATEMENT.transactions, lines)
+    recurring = find_recurring(STATEMENT.transactions, lines, RULES)
     print("  Then plain arithmetic, no model:")
     for item in recurring:
         state = f"{item.monthly_cost} a month" if item.active else "ended"
@@ -100,7 +100,7 @@ def _call_stdio_server(calls: list[tuple[str, dict[str, Any]]]) -> list[str]:
         parameters = StdioServerParameters(
             command=sys.executable,
             args=["-m", "subfinder.lib.mcp_server"],
-            env=dict(os.environ),
+            env=os.environ.copy(),
         )
         async with Client(parameters) as client:
             for tool, arguments in calls:
@@ -119,7 +119,7 @@ def _tag_over_mcp(active: list[Recurring]) -> None:
     ]
     tools = _call_stdio_server(calls)
     print(f"  The server offers: {', '.join(tools)}")
-    print(f"  Claude Code sees each one as {_TOOL.format('<tool>')}")
+    print(f"  Claude Code sees each one as {HOOKS.tool_prefix}<tool>")
     _expect(len(load_workbook().tags) == len(active), f"{len(active)} subscriptions tagged, in a file on disk")
 
 
@@ -150,7 +150,7 @@ def _summary_arguments(active: list[Recurring], extra: Decimal = Decimal("0.00")
 
 def _save_through_hooks(active: list[Recurring]) -> None:
     _heading("HOOKS: code that runs at fixed points, whatever the model decides")
-    save = _TOOL.format("save_summary")
+    save = f"{HOOKS.tool_prefix}save_summary"
 
     stopping_early = json.loads(_run_hook("stop", {"stop_hook_active": False}))
     print(f"  Stop, tags but no summary: {stopping_early['decision']}")
@@ -167,7 +167,7 @@ def _save_through_hooks(active: list[Recurring]) -> None:
     _call_stdio_server([("save_summary", honest)])
     _run_hook("post-tool-use", {"tool_name": save, "tool_input": honest, "tool_response": {}})
 
-    audit = (workspace_dir() / "audit.jsonl").read_text(encoding="utf-8").splitlines()
+    audit = audit_log_path().read_text(encoding="utf-8").splitlines()
     outcomes = [json.loads(line)["outcome"] for line in audit]
     print(f"  PostToolUse, audit log: {outcomes}")
     _expect(outcomes == ["denied", "ran"], "the audit log has the refused call and the one that ran")

@@ -52,6 +52,8 @@ class Settings(Strict):
     model: str
     prices: dict[str, Price]
     workspace_dir: str
+    workbook_file: str
+    audit_file: str
 
 
 SETTINGS = config_for(__name__, Settings)
@@ -65,3 +67,13 @@ def model_from_env() -> str:
 def workspace_dir() -> Path:
     """The folder a run writes to: SUBFINDER_WORKSPACE, or the git-ignored folder in the repo."""
     return Path(os.environ.get("SUBFINDER_WORKSPACE", REPO_ROOT / SETTINGS.workspace_dir))
+
+
+def workbook_path() -> Path:
+    """The file that holds a run's tags and summary."""
+    return workspace_dir() / SETTINGS.workbook_file
+
+
+def audit_log_path() -> Path:
+    """The file the hooks append every tool call to."""
+    return workspace_dir() / SETTINGS.audit_file

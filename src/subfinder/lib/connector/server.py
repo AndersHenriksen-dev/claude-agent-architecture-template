@@ -94,7 +94,7 @@ def serving_in_background(app: ASGIApp) -> Iterator[str]:
     with socket.socket() as probe:
         probe.bind((CONFIG.host, 0))
         port: int = probe.getsockname()[1]
-    server = _QuietServer(uvicorn.Config(app, host=CONFIG.host, port=port, log_level="warning"))
+    server = uvicorn.Server(uvicorn.Config(app, host=CONFIG.host, port=port, log_level="warning"))
     thread = threading.Thread(target=server.run, daemon=True)
     thread.start()
     while not server.started:
@@ -104,10 +104,3 @@ def serving_in_background(app: ASGIApp) -> Iterator[str]:
     finally:
         server.should_exit = True
         thread.join(timeout=10)
-
-
-class _QuietServer(uvicorn.Server):
-    """A server that can run on a thread that is not the main one, where signal handlers cannot be set."""
-
-    def install_signal_handlers(self) -> None:
-        """Leave signals alone."""

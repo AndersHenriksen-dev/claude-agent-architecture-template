@@ -14,13 +14,10 @@ class _Config(Strict):
 CONFIG = config_for(__name__, _Config)
 
 
-class ScriptedCleaner:
-    """Answers from the hand-written file, free. It behaves like a model that gets every line right."""
-
-    def clean(self, descriptions: list[str]) -> Cleaning:
-        """Look up each description."""
-        wanted = set(descriptions)
-        return Cleaning(lines=[line for line in CONFIG.lines if line.description in wanted])
+def clean_from_reference(descriptions: list[str]) -> Cleaning:
+    """Look up each description, free. It behaves like a model that gets every line right."""
+    wanted = set(descriptions)
+    return Cleaning(lines=[line for line in CONFIG.lines if line.description in wanted])
 
 
 def count_agreeing(lines: list[CleanedLine]) -> int:
