@@ -21,7 +21,13 @@ from mcp import Client, StdioServerParameters
 from subfinder.lib.api.scripted import ScriptedCleaner
 from subfinder.lib.connector.request import build_request
 from subfinder.lib.connector.server import build_app, serving_in_background
-from subfinder.lib.demo.project_files import read_frontmatter, rule_applies_to, rule_files, skill_files
+from subfinder.lib.demo.project_files import (
+    read_frontmatter,
+    rule_applies_to,
+    rule_files,
+    skill_files,
+    subfolder_instruction_files,
+)
 from subfinder.lib.shared.settings import REPO_ROOT, workspace_dir
 from subfinder.lib.statement.recurring import Recurring, find_recurring
 from subfinder.lib.statement.transactions import STATEMENT
@@ -52,6 +58,11 @@ def _show_rules() -> None:
     _expect(rule_applies_to(money, _SAMPLE_FILE), f"money.md loads for {_SAMPLE_FILE}")
     _expect(not rule_applies_to(money, "README.md"), "money.md stays out of context for README.md")
     _expect(rule_applies_to(advice, "README.md"), "no-advice.md loads everywhere")
+    print("  CLAUDE.md at the root loads at launch. Each of these loads only when its folder is touched:")
+    subfolder_files = subfolder_instruction_files()
+    for path in subfolder_files:
+        print(f"    {path.relative_to(REPO_ROOT).as_posix()}")
+    _expect(bool(subfolder_files), "the repo shows a subfolder CLAUDE.md")
 
 
 def _show_skill() -> None:

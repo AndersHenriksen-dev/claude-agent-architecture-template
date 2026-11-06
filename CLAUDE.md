@@ -23,6 +23,7 @@ uv run ruff check . && uv run ruff format --check . && uv run mypy src && uv run
 | [.claude/reference/git-workflow.md](.claude/reference/git-workflow.md) | **Before creating a branch, a commit or a pull request** | Branch names, commit messages (`tag(scope): Header`, a body that says why), rebasing, pull request bodies, attribution. |
 | [.claude/commands/commit-push-pr.md](.claude/commands/commit-push-pr.md) | Committing and opening a pull request | Command that runs the checks, commits, pushes and opens the pull request. |
 | [.claude/rules/](.claude/rules/) | Changing what Claude is asked to follow | The example's rules. `money.md` loads for statement files, `no-advice.md` in every session. |
+| [src/subfinder/lib/hooks/CLAUDE.md](src/subfinder/lib/hooks/CLAUDE.md) | Working on hooks (loads by itself) | The example's subfolder instructions. |
 | [.claude/skills/find-subscriptions/](.claude/skills/find-subscriptions/SKILL.md) | Changing the procedure | The example's skill and its summary format. |
 | [.mcp.json](.mcp.json) | Changing how the server starts | The MCP server. Its key is part of every `mcp__subfinder__<tool>` name. |
 | [.claude/settings.json](.claude/settings.json) | Changing permissions or hooks | Allowed, asked and denied commands, and every hook. |
@@ -37,9 +38,9 @@ uv run ruff check . && uv run ruff format --check . && uv run mypy src && uv run
 
 - Synthetic data only. Names, merchants and amounts are made up. Nothing from Anders's current or past employers goes in this repo: no code, prompts, documents, internal names or data.
 - Never commit keys or what a run writes: `.env` and `workspace/` are git-ignored. Never read `.env`.
+- Personal notes and overrides go in `CLAUDE.local.md` and `.claude/settings.local.json`, which are git-ignored. Anything the whole team needs, especially a hook, goes in `.claude/settings.json`.
 - Tests and the demo never call the paid API. Run `run --yes` or `connector-ask --yes` only when asked, and say the number of calls, the model and the cost first.
 - Every write tool has a check in `lib/hooks/checks.py` and a `PreToolUse` matcher in `.claude/settings.json`. The connector serves read tools only, because no hook sees its calls.
-- A check is a pure function with no knowledge of Claude Code, so the run in `lib/api/run.py` can call the same one.
 - Money is `Money` from `lib/statement/transactions.py`, never `float`.
 - Prompts, tool descriptions, prices, limits and data go in `config/`, not in code. A Python file that needs config has one YAML file at the same path under `config/`, read with `config_for(__name__, ...)` and checked by a Pydantic model.
 - A statement in `docs/types.md` or `docs/learn/` about how Claude works must match the current Claude docs. Check them when changing one, rather than relying on memory.

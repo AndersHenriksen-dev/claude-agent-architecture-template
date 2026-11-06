@@ -22,6 +22,30 @@ paths:
 
 **Writing one that gets followed.** Be concrete enough to check. "Never use `float` for money" works and "be careful with numbers" does not. The docs suggest under 200 lines per file, because longer files lower how well they are followed, and two rules that contradict each other get resolved arbitrarily.
 
+## Every place instructions can live
+
+`CLAUDE.md` is not one file. Claude Code looks in several places:
+
+| File | Who it is for | When it loads |
+|---|---|---|
+| `~/.claude/CLAUDE.md` | You, in every project | At launch |
+| `CLAUDE.md` or `.claude/CLAUDE.md` | Everyone on the project, through git | At launch |
+| `CLAUDE.local.md` | You, in this project. Add it to `.gitignore` | At launch |
+| A parent folder's `CLAUDE.md` | Whoever starts below it | At launch |
+| A subfolder's `CLAUDE.md` | Whoever works there | When Claude reads or edits a file in that subfolder |
+
+**They stack.** Claude Code does not pick one. It joins them from the top of the folder tree down, so the closest is read last, and in each folder `CLAUDE.local.md` comes after `CLAUDE.md`. Being read last is not a guarantee of winning: if two files contradict each other, Claude may pick either.
+
+**Subfolder files save context.** This repo's [lib/hooks/CLAUDE.md](../../src/subfinder/lib/hooks/CLAUDE.md) says what to keep in mind when editing hooks. Anyone working on the statement never pays for it.
+
+**A subfolder `CLAUDE.md` or a path-scoped rule?** Both load on demand. Use the subfolder file when the instructions are about one folder. Use a rule when they follow a kind of file across folders: `money.md` here covers `lib/statement/`, `config/statement/` and `tests/statement/`.
+
+**`CLAUDE.local.md` is for what is true only for you**, such as your sandbox URL or your preferred test data. It stays out of git only if you add it to `.gitignore`, and it exists only in the worktree where you made it.
+
+**Comments for people.** Block-level HTML comments are stripped before the text reaches the model, so you can leave notes for maintainers at no cost in context.
+
+To see what loaded in a session, run `/context all`.
+
 ## Skills
 
 A skill is a folder:

@@ -19,6 +19,8 @@ The example finds the subscriptions in a made-up bank statement. It is a good fi
 
 [docs/types.md](docs/types.md) says when to pick each one over the others. If you only read one page, read that one.
 
+The rule row covers more files than it looks like: a shared `CLAUDE.md`, a personal `CLAUDE.local.md`, one in any subfolder, and `.claude/rules/`. Hooks and permissions live in `settings.json` and `settings.local.json`. Instruction files stack and settings files override, and [docs/types.md](docs/types.md#which-file-for-what) says which file to use for what.
+
 A "guard" is not a seventh type. The Claude docs do not have that term: it usually means a check that can block something, and in Claude Code a hook is what runs it. Here the [check](src/subfinder/lib/hooks/checks.py) is a plain function, so the API path can call the same one where no hook exists.
 
 ## What I learned
@@ -133,17 +135,21 @@ Click **Use this template**, then follow [docs/adapt.md](docs/adapt.md). Most of
 ## Layout
 
 ```text
+CLAUDE.md                      RULES: repo-wide, for everyone
+CLAUDE.local.md                RULES: yours alone, git-ignored, not in the repo
 .mcp.json                      MCP: how Claude Code starts the server
 .claude/
 |-- rules/                     RULES
 |-- skills/find-subscriptions/ SKILL
-|-- settings.json              HOOKS: which event runs what
+|-- settings.json              HOOKS and permissions, for everyone
+|-- settings.local.json        your overrides, git-ignored, not in the repo
 `-- reference/                 the style and git guides
 src/subfinder/
 |-- cli.py                     the entry point
 |-- lib/
 |   |-- statement/             the made-up data, tools and arithmetic (swap this)
-|   |-- hooks/                 HOOKS: checks.py decides, events.py runs them
+|   |-- hooks/                 HOOKS: checks.py decides, events.py runs them, and a
+|   |                          CLAUDE.md that loads only when working in this folder
 |   |-- mcp_server/            MCP: every tool over stdio
 |   |-- connector/             CONNECTOR: read tools over HTTP, and the request
 |   |-- api/                   API: the call, and the run with no Claude Code

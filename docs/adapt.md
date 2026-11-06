@@ -7,7 +7,7 @@ Click **Use this template** on GitHub, then replace the example with your own id
 1. **The domain.** Replace `src/subfinder/lib/statement/` and `src/subfinder/config/statement/`. Keep the split: data and pure functions in one place, and tools as plain functions in `tools.py`.
 2. **The tools.** List your read and write tools in `lib/mcp_server/server.py`, with their descriptions in `config/mcp_server/server.yaml`.
 3. **The checks.** Replace `lib/hooks/checks.py` with what must never happen in your domain. Update the matcher in `.claude/settings.json` so that every write tool has a check in front of it.
-4. **The rules.** Rewrite `.claude/rules/`. Keep each file to one topic and scope it with `paths` where you can.
+4. **The instructions.** Rewrite the root `CLAUDE.md`, any subfolder `CLAUDE.md` such as `lib/hooks/CLAUDE.md`, and `.claude/rules/`. Keep each rule to one topic and scope it with `paths` where you can. Your own notes go in `CLAUDE.local.md`, and your own overrides in `.claude/settings.local.json`: `.gitignore` already covers both.
 5. **The skill.** Rename `.claude/skills/find-subscriptions/` and rewrite its steps. The `name` must match the folder.
 6. **The API call.** Change the output shape and prompt in `lib/api/clean_merchants.py` and its config, or delete the folder if nothing runs headless.
 7. **The connector.** Decide what may be reached from outside. Delete `lib/connector/` if nothing may.

@@ -90,13 +90,34 @@ Claude Code checks a tool call in this order: hooks, deny rules, ask rules, perm
 - A hook's `allow` does **not** skip deny and ask rules.
 - A hook that says nothing passes the call on, which is what this repo does for a good call.
 
+## Settings files
+
+Hooks and permission rules live in settings files, and those behave in the opposite way to `CLAUDE.md` files. Instruction files stack. Settings files override.
+
+| Priority | File | Who it is for | In git? |
+|---|---|---|---|
+| Highest | Managed settings | Everyone in an organization | No |
+| | `--settings` on the command line | This session | No |
+| | `.claude/settings.local.json` | You, in this project | No |
+| | `.claude/settings.json` | Everyone on the project | Yes |
+| Lowest | `~/.claude/settings.json` | You, in every project | No |
+
+- **A single value** comes from the highest level that sets it.
+- **Lists combine.** `permissions.allow` adds up across files. A lower file can add to a list and cannot remove from it, and an `allow` in your local file does not cancel an `ask` in the shared one.
+- **`settings.local.json` mostly writes itself.** Choosing "Yes, and don't ask again" saves an `allow` rule there, and Claude Code keeps the file out of git through your global excludes. If you make it by hand, add it to `.gitignore`.
+- **Trust.** `deny` and `ask` rules in a shared file apply at once. Its `allow` rules wait until you trust the folder, so a cloned repo cannot pre-approve commands for you.
+
+Put a hook that protects something in the shared file, as this repo does, so it runs for everyone. Put a personal convenience, such as a desktop notification, in your local or user file.
+
+To see which files loaded, run `/status`.
+
 ## When not to use one
 
 A hook is the wrong tool for anything needing judgement, such as "is this sentence financial advice?". That stays a [rule](02-rules-and-skills.md), or goes to a `prompt` hook, which asks a model and so gives up the guarantee. And remember a hook's reach: it runs in Claude Code and the Agent SDK, and nowhere else.
 
 ## Where to find this in the code
 
-- The wiring: [settings.json](../../.claude/settings.json).
+- The wiring: [settings.json](../../.claude/settings.json). What to remember when editing: [lib/hooks/CLAUDE.md](../../src/subfinder/lib/hooks/CLAUDE.md).
 - The checks: `check_tag()` and `check_summary()` in [checks.py](../../src/subfinder/lib/hooks/checks.py).
 - The events: `on_pre_tool_use()`, `on_post_tool_use()` and `on_stop()` in [events.py](../../src/subfinder/lib/hooks/events.py).
 - The tests, which start a real process per event: [test_events.py](../../tests/hooks/test_events.py).

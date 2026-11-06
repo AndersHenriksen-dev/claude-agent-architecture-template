@@ -40,6 +40,11 @@ def skill_files() -> list[Path]:
     return sorted((REPO_ROOT / ".claude" / "skills").glob("*/SKILL.md"))
 
 
+def subfolder_instruction_files() -> list[Path]:
+    """Every CLAUDE.md under `src/`. Claude Code loads each one only when a file in its folder is touched."""
+    return sorted((REPO_ROOT / "src").rglob("CLAUDE.md"))
+
+
 def rule_applies_to(rule: Path, relative_path: str) -> bool:
     """Whether a rule loads for a file. A rule with no `paths` loads in every session."""
     patterns = read_frontmatter(rule)[0].get("paths", [])

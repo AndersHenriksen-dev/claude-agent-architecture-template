@@ -15,7 +15,7 @@ Ask these in order. Stop at the first yes.
 
 | Type | Lives in | Who decides it runs | Can it stop the model? | Context it costs |
 |---|---|---|---|---|
-| Rule | `.claude/rules/*.md`, `CLAUDE.md` | Claude Code loads it; the model chooses whether to follow it | No | All of it, once loaded |
+| Rule | `CLAUDE.md` files, `.claude/rules/*.md` | Claude Code loads it; the model chooses whether to follow it | No | All of it, once loaded |
 | Skill | `.claude/skills/<name>/SKILL.md` | You or the model | No | The description always, the body when used |
 | Hook | `.claude/settings.json` | Claude Code, at a fixed event | Yes | None, unless it speaks |
 | MCP | `.mcp.json` and a server program | The model picks a tool | The server can refuse | The tool list |
@@ -26,11 +26,11 @@ The line that matters most runs between the first two rows and the third. The me
 
 ## Rule
 
-**What it is.** Markdown that Claude Code loads into context. A file in `.claude/rules/` with no frontmatter loads at launch, like `CLAUDE.md`. One with a `paths` field loads when Claude reads or edits a matching file.
+**What it is.** Markdown that Claude Code loads into context: any `CLAUDE.md` file, and any file in `.claude/rules/`. A rule with no frontmatter loads at launch, like the root `CLAUDE.md`. One with a `paths` field loads when Claude reads or edits a matching file. [Which file for what](#which-file-for-what) lists every place these can live.
 
 **Pick it over the others when** the content is a fact or a standard Claude should keep in mind while it does other things. Not a skill, because it has no steps and no moment when it starts. Not a hook, because a wrong outcome is cheap or a program cannot judge it.
 
-**In the example.** [money.md](../.claude/rules/money.md) loads only for statement code: use `Decimal`, a negative amount is money out, keep the data made up. [no-advice.md](../.claude/rules/no-advice.md) loads in every session, because no code can judge whether a sentence gives financial advice. The part of the money rule a machine can check also has a test, in [test_project_files.py](../tests/demo/test_project_files.py).
+**In the example.** [money.md](../.claude/rules/money.md) loads only for statement code: use `Decimal`, a negative amount is money out, keep the data made up. [no-advice.md](../.claude/rules/no-advice.md) loads in every session, because no code can judge whether a sentence gives financial advice. The part of the money rule a machine can check also has a test, in [test_project_files.py](../tests/demo/test_project_files.py). [CLAUDE.md](../CLAUDE.md) at the root holds what applies everywhere, and [lib/hooks/CLAUDE.md](../src/subfinder/lib/hooks/CLAUDE.md) holds what only matters when working on hooks.
 
 ## Skill
 
@@ -86,6 +86,77 @@ The server speaks ordinary MCP. What changes is who calls it and from where: a l
 **Pick it over the others when** no person and no Claude Code are there, such as a nightly job, or when your code should decide what happens next. Start with one call. The docs' advice is to use the simplest tier that works, and an agent loop is only worth it when the steps cannot be known in advance.
 
 **In the example.** [clean_merchants.py](../src/subfinder/lib/api/clean_merchants.py) makes one structured-output call that turns messy descriptions such as `TNBX*PREMIUM` into a clean merchant and a category. [run.py](../src/subfinder/lib/api/run.py) does the rest as arithmetic. No hook runs here, so that code calls the same checks itself.
+
+## Which file for what
+
+Two families of file configure Claude Code, and they behave in opposite ways. **Instruction files stack: Claude reads all of them. Settings files override: one value wins, except that lists combine.**
+
+Settings are not a seventh type. They are where hooks and permission rules live.
+
+### Instruction files
+
+Text the model reads, so all of it asks and none of it enforces.
+
+| File | Who it is for | When it loads | In git? |
+|---|---|---|---|
+| `~/.claude/CLAUDE.md` | You, in every project | At launch | No, it is in your home folder |
+| `CLAUDE.md` or `.claude/CLAUDE.md` | Everyone on the project | At launch | Yes |
+| `CLAUDE.local.md` | You, in this project | At launch, after the `CLAUDE.md` beside it | No: add it to `.gitignore` |
+| `CLAUDE.md` in a parent folder | Whoever starts below it | At launch | Depends on the repo |
+| `CLAUDE.md` in a subfolder | Whoever works in that folder | When Claude reads or edits a file in that subfolder | Yes |
+| `.claude/rules/*.md` | Everyone on the project | At launch, or on a matching file with `paths` | Yes |
+| Managed `CLAUDE.md` | Everyone in an organization | At launch | No, IT deploys it |
+
+**Nothing overrides.** Files are joined, from the top of the folder tree down, so the one closest to you is read last. If two contradict each other, Claude may pick either one, so remove the conflict instead of relying on the order.
+
+**Which one to use:**
+
+- **Shared root `CLAUDE.md`:** what everyone needs in every session, such as how to run the tests.
+- **`CLAUDE.local.md`:** what is true only for you, such as your sandbox URL. One gotcha: it exists only in the worktree where you made it.
+- **Subfolder `CLAUDE.md`:** what matters only in that folder. It costs nothing until then.
+- **`.claude/rules/` with `paths`:** the same saving when the files you mean are not all in one folder. The money rule here covers `lib/`, `config/` and `tests/`, which one subfolder could not do.
+
+### Settings files
+
+JSON that Claude Code itself acts on: permission rules, hooks, the model and more. These can enforce, because the model does not get a say.
+
+From the highest priority to the lowest:
+
+| Level | File | Who it is for | In git? |
+|---|---|---|---|
+| Managed | `managed-settings.json`, or sent from the admin console | Everyone in an organization | No |
+| Command line | `--settings` | This session | No |
+| Project local | `.claude/settings.local.json` | You, in this project | No |
+| Shared project | `.claude/settings.json` | Everyone on the project | Yes |
+| User | `~/.claude/settings.json` | You, in every project | No |
+
+**A single value comes from the highest level that sets it.** So a `model` in your local file beats the team's file, and neither beats managed settings.
+
+**Lists combine.** `permissions.allow` from every file adds up, so a lower file can add to a list but cannot remove from it. This catches people out: an `allow` in your local file does not cancel an `ask` in the team's file.
+
+**Which one to use:**
+
+- **`.claude/settings.json`:** what the whole team must share. Hooks belong here, because a safety check that only runs on one machine is not a safety check.
+- **`.claude/settings.local.json`:** your own overrides. You rarely create it by hand: choosing "Yes, and don't ask again" on a prompt writes an `allow` rule here, and Claude Code keeps the file out of git through your global excludes.
+- **`~/.claude/settings.json`:** your preferences in every project, such as your theme.
+
+**Trust.** `deny` and `ask` rules in a shared file apply at once. Its `allow` rules wait until you trust the folder, so a cloned repo cannot pre-approve commands for you.
+
+**Start in the right folder.** Claude Code reads the shared project settings from the folder a session starts in, while `CLAUDE.md` files are also found in parent folders. So a session started above this repo misses its settings, and a session started in a subfolder finds the root `CLAUDE.md` but not `.claude/settings.json`.
+
+**Cloud sessions** work from a fresh clone. `~/.claude/settings.json` and `.claude/settings.local.json` stay on your machine, so they never apply there. A session on one repository reads the shared `.claude/settings.json`, though not every kind of cloud session does.
+
+**To see what actually loaded:** `/status` lists the settings files, and `/context all` lists the instruction files.
+
+### In this repo
+
+| File | What it holds |
+|---|---|
+| [CLAUDE.md](../CLAUDE.md) | How to run things, the index, the repo-wide rules |
+| [lib/hooks/CLAUDE.md](../src/subfinder/lib/hooks/CLAUDE.md) | What to keep in mind when editing hooks |
+| [.claude/settings.json](../.claude/settings.json) | The hooks, and the commands that are allowed, ask first or are denied |
+| `CLAUDE.local.md` | Not committed. [.gitignore](../.gitignore) lists it, so you can add your own |
+| `.claude/settings.local.json` | Not committed. Also listed, and your standing approvals end up here |
 
 ## How they fit in one run
 

@@ -5,8 +5,8 @@ A study guide to the six building blocks of agentic development with Claude, and
 | # | File | What it covers |
 |---|---|---|
 | 1 | [The six types](01-the-six-types.md) | The map: who decides what runs, what enforces and what only asks, and what each type costs in context |
-| 2 | [Rules and skills](02-rules-and-skills.md) | How Claude Code loads instructions, and how to tell a fact from a procedure |
-| 3 | [Hooks](03-hooks.md) | Events, the JSON on stdin and stdout, the three hooks here, and why a guard is a hook |
+| 2 | [Rules and skills](02-rules-and-skills.md) | Every place instructions can live (`CLAUDE.md`, `CLAUDE.local.md`, subfolders, rules), and how to tell a fact from a procedure |
+| 3 | [Hooks](03-hooks.md) | Events, the JSON on stdin and stdout, the three hooks here, why a guard is a hook, and how the settings files override each other |
 | 4 | [MCP](04-mcp.md) | What the protocol does, tools and their schemas, stdio, and how Claude Code names a tool |
 | 5 | [The API](05-the-api.md) | One structured call instead of an agent, what the current models reject, and how to read an answer |
 | 6 | [Connectors](06-connectors.md) | What the word means, the two halves of the request, and why your hooks never see the call |
