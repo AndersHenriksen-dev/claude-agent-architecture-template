@@ -1,0 +1,25 @@
+# The correct cleaning of the statement, written by hand. The demo and the tests use it in place of the model, and a
+# paid run is compared with it. Keep one entry per distinct description in config/statement/transactions.yaml.
+lines:
+  - { description: "HUSLEJE BOLIGSELSK 8821", merchant: "Boligselskab", category: housing }
+  - { description: "FITZONE CPH DD 44120", merchant: "FitZone", category: subscription }
+  - { description: "FITZONE CPH DD 45871", merchant: "FitZone", category: subscription }
+  - { description: "FITZONE CPH DD 47102", merchant: "FitZone", category: subscription }
+  - { description: "VIEWLY.COM 8437 DUBLIN", merchant: "Viewly", category: subscription }
+  - { description: "VIEWLY *MONTHLY", merchant: "Viewly", category: subscription }
+  - { description: "VIEWLY.COM/BILL IE", merchant: "Viewly", category: subscription }
+  - { description: "TUNEBOX P2F3A1", merchant: "Tunebox", category: subscription }
+  - { description: "TNBX*PREMIUM", merchant: "Tunebox", category: subscription }
+  - { description: "TUNEBOX AB STHLM", merchant: "Tunebox", category: subscription }
+  - { description: "CLDVAULT.IO STORAGE", merchant: "CloudVault", category: subscription }
+  - { description: "CLOUDVAULT BACKUP", merchant: "CloudVault", category: subscription }
+  - { description: "NEWSDAILY DIGITAL", merchant: "NewsDaily", category: subscription }
+  - { description: "NEWSDAILY.DK ABO", merchant: "NewsDaily", category: subscription }
+  - { description: "TELINO MOBIL 22334455", merchant: "Telino", category: bill }
+  - { description: "KVICKMARKED 221 NORD", merchant: "Kvickmarked", category: groceries }
+  - { description: "KVICKMARKED 118 HAVN", merchant: "Kvickmarked", category: groceries }
+  - { description: "HARBOUR LANE COFFEE", merchant: "Harbour Lane Coffee", category: other }
+  - { description: "NORDRAIL TICKET 7731", merchant: "Nordrail", category: other }
+  - { description: "NORDRAIL TICKET 8120", merchant: "Nordrail", category: other }
+  - { description: "BOGHANDLEN NORD", merchant: "Boghandlen", category: other }
+  - { description: "LOEN NORDLYS APS", merchant: "Nordlys", category: income }
