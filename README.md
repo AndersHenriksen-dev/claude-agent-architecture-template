@@ -90,13 +90,13 @@ uv run subfinder reset
 
 ### Through the API (costs money)
 
-Copy `.env.example` to `.env` and add your key. This makes one call on Claude Sonnet 5.5, roughly 1,000 input and 1,500 output tokens, which is about USD 0.02 by my estimate. Without `--yes` it only prints the plan.
+Copy `.env.example` to `.env` and add your key. This makes one call on Claude Sonnet 5.5. Without `--yes` it only prints the plan.
 
 ```bash
 uv run subfinder run --yes
 ```
 
-It prints what it found and how many descriptions agree with the [hand-written answer](src/subfinder/config/api/scripted.yaml). To use another model, set `SUBFINDER_MODEL`.
+It prints what it found and how many descriptions agree with the [hand-written answer](src/subfinder/config/api/scripted.yaml). When I ran it once, it used 1,118 input and 865 output tokens, which cost USD 0.0109. It found the same four subscriptions and the same 506.00 total, saw that NewsDaily had ended, and agreed on 20 of the 22 descriptions. To use another model, set `SUBFINDER_MODEL`.
 
 ### Through a connector (costs money)
 
