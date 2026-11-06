@@ -12,6 +12,7 @@ import pytest
 
 from subfinder.lib.api.commands import cmd_run, cost_usd
 from subfinder.lib.connector.commands import cmd_ask, cmd_serve
+from subfinder.lib.shared.settings import REPO_ROOT
 
 RUN_CLI = [sys.executable, "-c", "from subfinder.cli import main; main()"]
 
@@ -86,6 +87,6 @@ class TestCost:
 
 
 def test_settings_ask_before_every_paid_command() -> None:
-    settings = json.loads(Path(".claude/settings.json").read_text(encoding="utf-8"))
+    settings = json.loads((REPO_ROOT / ".claude" / "settings.json").read_text(encoding="utf-8"))
     assert "Bash(uv run subfinder run:*)" in settings["permissions"]["ask"]
     assert "Bash(uv run subfinder connector-ask:*)" in settings["permissions"]["ask"]

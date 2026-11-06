@@ -40,7 +40,7 @@ def cmd_run(yes: bool) -> int:
         The exit code.
     """
     model = model_from_env()
-    print(f"Plan: 1 Messages API call on {model}, roughly 1,000 input and 1,500 output tokens.")
+    print(f"Plan: 1 Messages API call on {model}, roughly 1,100 input and 900 output tokens.")
     if not yes:
         print("That costs money, so nothing was sent. Add --yes to run it. `subfinder demo` is free.")
         return 0
