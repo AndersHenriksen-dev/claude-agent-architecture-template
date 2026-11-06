@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "subfinder": {
+      "command": "uv",
+      "args": ["run", "--quiet", "python", "-m", "subfinder.lib.mcp_server"]
+    }
+  }
+}

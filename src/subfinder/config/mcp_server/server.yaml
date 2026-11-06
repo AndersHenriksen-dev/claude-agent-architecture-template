@@ -1,0 +1,19 @@
+name: subfinder
+instructions: >-
+  A made-up bank statement in DKK. Read it, tag the subscriptions, then save one summary.
+  Amounts are strings with two decimals, such as "99.00". Negative amounts are money out.
+
+read_tools:
+  list_transactions: Every line on the statement, with its raw description, date and amount.
+  get_merchant: >-
+    The statement lines whose raw description contains a name, ignoring case, spaces and punctuation.
+    Raw descriptions vary from month to month, so search for each spelling you have seen.
+  get_summary: The saved summary, or nothing if no run has finished.
+
+write_tools:
+  tag_subscription: >-
+    Mark a merchant as a subscription, with the ids of the charges that show it. Use one clean merchant name
+    for all the charges of one subscription, however differently the bank wrote them.
+  save_summary: >-
+    Save the finished summary. Each line is a tagged merchant and the monthly saving if it were cancelled, which
+    is its latest charge at most. The total must equal the sum of the lines.
