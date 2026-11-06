@@ -34,6 +34,10 @@ It has to be public to be useful, so an open default would be a mistake waiting 
 
 The hook runs at the end of every turn in this repo, including ordinary coding. It only acts on a half-done run, so nobody working on the code is sent back to save a summary.
 
+## `reset` keeps the audit log
+
+`subfinder reset` deletes the workbook and leaves `audit.jsonl`. An audit log is only worth having if the thing it records cannot wipe it, so it is append-only. Delete the file by hand to start a clean log.
+
 ## Money crosses JSON as a string
 
 A JSON number becomes a Python float, and 99.10 as a float is not 99.10. `Money` refuses floats and its schema tells clients to send a string, so this fails at the boundary instead of somewhere in the arithmetic.

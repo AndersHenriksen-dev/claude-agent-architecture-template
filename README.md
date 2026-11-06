@@ -82,7 +82,7 @@ Open Claude Code in this folder, approve the `subfinder` MCP server when asked, 
 /find-subscriptions
 ```
 
-The rules, the skill, the hooks and the server all load from the repo. To start again:
+The rules, the skill, the hooks and the server all load from the repo, as long as the session starts in this folder and not a parent of it. In a real session, the skill reached the right answer, `PostToolUse` logged every call, `PreToolUse` denied a saving of 999.00 on Viewly, and `Stop` sent back a run with no summary. To start again:
 
 ```bash
 uv run subfinder reset
