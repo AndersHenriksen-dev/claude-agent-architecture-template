@@ -6,6 +6,7 @@ why this file has no tool loop and no checks.
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import Any, Literal
 
 import anthropic
@@ -27,7 +28,8 @@ class _Config(Strict):
 CONFIG = config_for(__name__, _Config)
 
 
-class Answer(Strict):
+@dataclass(frozen=True)
+class Answer:
     """What came back: the text, which tools the cloud called on our server, and the tokens spent."""
 
     text: str

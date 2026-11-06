@@ -14,7 +14,7 @@ from typing import Any
 from pydantic import BaseModel, ValidationError
 
 from subfinder.lib.hooks.checks import Decision, check_summary, check_tag
-from subfinder.lib.shared.settings import Strict, config_for, workspace_dir
+from subfinder.lib.shared.settings import Strict, audit_log_path, config_for
 from subfinder.lib.statement.transactions import STATEMENT
 from subfinder.lib.statement.workbook import Summary, Tag, load_workbook
 
@@ -46,7 +46,7 @@ def _check_call(event: _ToolEvent) -> Decision:
     tool = event.tool_name.removeprefix(CONFIG.tool_prefix)
     try:
         if tool == "tag_subscription":
-            return check_tag(Tag.model_validate(event.tool_input), STATEMENT)
+            return check_tag(Tag.model_validate(event.tool_input), load_workbook().tags, STATEMENT)
         if tool == "save_summary":
             return check_summary(Summary.model_validate(event.tool_input), load_workbook().tags, STATEMENT)
     except ValidationError as error:
@@ -62,10 +62,21 @@ def _audit(outcome: str, event: _ToolEvent) -> None:
         "tool": event.tool_name,
         "input": event.tool_input,
     }
-    path = workspace_dir() / "audit.jsonl"
+    path = audit_log_path()
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("a", encoding="utf-8") as file:
         file.write(json.dumps(entry) + "\n")
+
+
+def _deny(reason: str) -> str:
+    output = {
+        "hookSpecificOutput": {
+            "hookEventName": "PreToolUse",
+            "permissionDecision": "deny",
+            "permissionDecisionReason": reason,
+        },
+    }
+    return json.dumps(output)
 
 
 def on_pre_tool_use(raw: str) -> str:
@@ -82,17 +93,6 @@ def on_pre_tool_use(raw: str) -> str:
         return ""
     _audit("denied", event)
     return _deny(decision.reason)
-
-
-def _deny(reason: str) -> str:
-    output = {
-        "hookSpecificOutput": {
-            "hookEventName": "PreToolUse",
-            "permissionDecision": "deny",
-            "permissionDecisionReason": reason,
-        },
-    }
-    return json.dumps(output)
 
 
 def on_post_tool_use(raw: str) -> str:

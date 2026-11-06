@@ -7,11 +7,10 @@ to "what has been tagged, and has a summary been saved?".
 from __future__ import annotations
 
 import json
-from pathlib import Path
 
 from pydantic import Field, ValidationError
 
-from subfinder.lib.shared.settings import Strict, workspace_dir
+from subfinder.lib.shared.settings import Strict, workbook_path
 from subfinder.lib.statement.transactions import Money
 
 
@@ -44,13 +43,9 @@ class Workbook(Strict):
     summary: Summary | None = None
 
 
-def _path() -> Path:
-    return workspace_dir() / "workbook.json"
-
-
 def load_workbook() -> Workbook:
     """Read the workbook, or start an empty one. A damaged file fails loudly instead of silently losing a run."""
-    path = _path()
+    path = workbook_path()
     if not path.exists():
         return Workbook()
     try:
@@ -61,11 +56,11 @@ def load_workbook() -> Workbook:
 
 def save_workbook(workbook: Workbook) -> None:
     """Write the workbook to disk."""
-    path = _path()
+    path = workbook_path()
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(workbook.model_dump(mode="json"), indent=2) + "\n", encoding="utf-8")
 
 
 def reset_workbook() -> None:
     """Forget the current run."""
-    _path().unlink(missing_ok=True)
+    workbook_path().unlink(missing_ok=True)

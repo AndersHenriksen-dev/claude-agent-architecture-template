@@ -6,6 +6,7 @@ Amounts are Decimal, and cross every JSON boundary as strings: a JSON number wou
 
 from __future__ import annotations
 
+import re
 from datetime import date
 from decimal import Decimal
 from typing import Annotated
@@ -17,16 +18,18 @@ from subfinder.lib.shared.settings import Strict, config_for
 _AMOUNT_PATTERN = r"^-?\d+\.\d{2}$"
 
 
-def _reject_float(value: object) -> object:
-    """Stop a float before Pydantic quietly turns it into a Decimal that carries its rounding error."""
+def _require_exact_amount(value: object) -> object:
+    """Stop a float, which would carry its rounding error, and a string that is not an amount, such as '1e5'."""
     if isinstance(value, float):
         raise ValueError("money must be a string such as '99.00', not a float")
+    if isinstance(value, str) and not re.fullmatch(_AMOUNT_PATTERN, value):
+        raise ValueError("money must have two decimals, such as '99.00'")
     return value
 
 
 Money = Annotated[
     Decimal,
-    BeforeValidator(_reject_float),
+    BeforeValidator(_require_exact_amount),
     PlainSerializer(lambda amount: f"{amount:.2f}", return_type=str),
     WithJsonSchema({"type": "string", "pattern": _AMOUNT_PATTERN, "description": "An amount such as '99.00'"}),
 ]

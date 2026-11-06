@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import date
 from decimal import Decimal
 
-from subfinder.lib.statement.recurring import CleanedLine, find_recurring
+from subfinder.lib.statement.recurring import CleanedLine, RecurringRules, find_recurring
 from subfinder.lib.statement.transactions import Transaction
 
 
@@ -13,6 +13,7 @@ def _charge(id_: str, month: int, description: str, amount: str) -> Transaction:
     return Transaction(id=id_, date=date(2026, month, 5), description=description, amount=Decimal(amount))
 
 
+RULES = RecurringRules(min_months=2)
 TRANSACTIONS = [
     _charge("A1", 8, "VIEWLY.COM", "-99.00"),
     _charge("A2", 9, "VIEWLY *M", "-99.00"),
@@ -36,20 +37,25 @@ CLEANED = [
 
 
 def test_different_descriptions_join_under_one_merchant() -> None:
-    found = {item.merchant: item for item in find_recurring(TRANSACTIONS, CLEANED)}
+    found = {item.merchant: item for item in find_recurring(TRANSACTIONS, CLEANED, RULES)}
     assert found["Viewly"].transaction_ids == ["A1", "A2", "A3"]
 
 
 def test_cost_is_the_latest_charge_and_the_rise_is_measured() -> None:
-    viewly = next(item for item in find_recurring(TRANSACTIONS, CLEANED) if item.merchant == "Viewly")
+    viewly = next(item for item in find_recurring(TRANSACTIONS, CLEANED, RULES) if item.merchant == "Viewly")
     assert viewly.monthly_cost == Decimal("119.00")
     assert viewly.price_rise == Decimal("20.00")
 
 
 def test_a_subscription_that_stopped_is_not_active() -> None:
-    news = next(item for item in find_recurring(TRANSACTIONS, CLEANED) if item.merchant == "NewsDaily")
+    news = next(item for item in find_recurring(TRANSACTIONS, CLEANED, RULES) if item.merchant == "NewsDaily")
     assert news.active is False
 
 
+def test_the_threshold_comes_from_the_rules() -> None:
+    strict = RecurringRules(min_months=3)
+    assert [item.merchant for item in find_recurring(TRANSACTIONS, CLEANED, strict)] == ["Viewly"]
+
+
 def test_leaves_out_one_offs_other_categories_and_money_in() -> None:
-    assert {item.merchant for item in find_recurring(TRANSACTIONS, CLEANED)} == {"NewsDaily", "Viewly"}
+    assert {item.merchant for item in find_recurring(TRANSACTIONS, CLEANED, RULES)} == {"NewsDaily", "Viewly"}

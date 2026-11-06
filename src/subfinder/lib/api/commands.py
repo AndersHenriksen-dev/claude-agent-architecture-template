@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+from functools import partial
+
 import anthropic
 from dotenv import load_dotenv
 
-from subfinder.lib.api.clean_merchants import ClaudeCleaner
+from subfinder.lib.api.clean_merchants import clean_with_claude
 from subfinder.lib.api.run import RunResult, find_and_save
 from subfinder.lib.api.scripted import CONFIG as REFERENCE
 from subfinder.lib.api.scripted import count_agreeing
@@ -45,7 +47,7 @@ def cmd_run(yes: bool) -> int:
         print("That costs money, so nothing was sent. Add --yes to run it. `subfinder demo` is free.")
         return 0
     load_dotenv()
-    result = find_and_save(ClaudeCleaner(anthropic.Anthropic()))
+    result = find_and_save(partial(clean_with_claude, anthropic.Anthropic()))
     _print_result(result)
     tokens = result.cleaning
     cost = cost_usd(model, tokens.input_tokens, tokens.output_tokens)

@@ -50,7 +50,7 @@ Every type did something a different type could not:
 `uv run subfinder run --yes` does the same job from a plain program.
 
 1. **Collect.** `find_and_save()` takes the 22 different descriptions.
-2. **One API call.** `ClaudeCleaner` sends them and gets back a merchant and a category for each.
+2. **One API call.** `clean_with_claude()` sends them and gets back a merchant and a category for each.
 3. **Arithmetic.** `find_recurring()` keeps outgoing charges in the `subscription` category, in at least 2 different months. It takes the latest charge as the cost, measures any rise, and marks a merchant active if it charged in the last month.
 4. **Check and save.** `tag_checked()` and `save_checked()` call the same checks as the hook. A refusal raises an error.
 

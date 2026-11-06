@@ -11,6 +11,8 @@ build/
 
 # Secrets
 .env
+.env.*
+!.env.example
 
 # What a run writes: the tags, the summary and the audit log
 workspace/

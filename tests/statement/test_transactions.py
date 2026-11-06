@@ -20,6 +20,11 @@ class TestMoney:
         with pytest.raises(ValidationError):
             self.adapter.validate_python(99.10)
 
+    @pytest.mark.parametrize("text", ["1e5", "1.999", "99", "NaN", "Infinity", ""])
+    def test_refuses_a_string_that_is_not_an_amount(self, text: str) -> None:
+        with pytest.raises(ValidationError):
+            self.adapter.validate_python(text)
+
     def test_writes_two_decimals_as_a_string(self) -> None:
         assert self.adapter.dump_python(Decimal("119"), mode="json") == "119.00"
 

@@ -7,12 +7,12 @@ from decimal import Decimal
 import pytest
 
 from subfinder.lib.api.run import find_and_save, save_checked, tag_checked
-from subfinder.lib.api.scripted import ScriptedCleaner
+from subfinder.lib.api.scripted import clean_from_reference
 from subfinder.lib.statement.workbook import Summary, SummaryLine, Tag, load_workbook
 
 
 def test_finds_the_four_active_subscriptions() -> None:
-    result = find_and_save(ScriptedCleaner())
+    result = find_and_save(clean_from_reference)
     savings = {line.merchant: line.monthly_saving for line in result.summary.lines}
     assert savings == {
         "CloudVault": Decimal("29.00"),
@@ -24,20 +24,20 @@ def test_finds_the_four_active_subscriptions() -> None:
 
 
 def test_notes_the_price_rise() -> None:
-    lines = {line.merchant: line for line in find_and_save(ScriptedCleaner()).summary.lines}
+    lines = {line.merchant: line for line in find_and_save(clean_from_reference).summary.lines}
     assert "20.00" in lines["Viewly"].note
     assert lines["Tunebox"].note == "Price unchanged."
 
 
 def test_reports_the_ended_subscription_without_counting_it() -> None:
-    result = find_and_save(ScriptedCleaner())
+    result = find_and_save(clean_from_reference)
     ended = [item.merchant for item in result.recurring if not item.active]
     assert ended == ["NewsDaily"]
     assert "NewsDaily" not in {line.merchant for line in result.summary.lines}
 
 
 def test_saves_tags_and_summary_to_the_workbook() -> None:
-    find_and_save(ScriptedCleaner())
+    find_and_save(clean_from_reference)
     workbook = load_workbook()
     assert len(workbook.tags) == 4
     assert workbook.summary is not None
@@ -45,7 +45,7 @@ def test_saves_tags_and_summary_to_the_workbook() -> None:
 
 def test_a_second_run_starts_clean() -> None:
     tag_checked(Tag(merchant="Old", transaction_ids=["T01"]))
-    find_and_save(ScriptedCleaner())
+    find_and_save(clean_from_reference)
     assert "Old" not in {tag.merchant for tag in load_workbook().tags}
 
 

@@ -38,9 +38,17 @@ The hook runs at the end of every turn in this repo, including ordinary coding. 
 
 `subfinder reset` deletes the workbook and leaves `audit.jsonl`. An audit log is only worth having if the thing it records cannot wipe it, so it is append-only. Delete the file by hand to start a clean log.
 
+## Hooks do not protect the stdio server from another client
+
+The checks on writes run in Claude Code's hooks. Another MCP client on the same machine, or a session with hooks turned off, could call `save_summary` with no check. Here that risks one local file of made-up data, and a server that checks too would hide what a hook does. A real system that writes something that matters should also run the check inside the server, as with a connector.
+
+## Classes hold data, functions do the work
+
+Pydantic models check what comes in: config, tool arguments, and the model's answer. Inside, results are frozen dataclasses. The two cleaners are plain functions with one signature, not classes, because neither keeps state.
+
 ## Money crosses JSON as a string
 
-A JSON number becomes a Python float, and 99.10 as a float is not 99.10. `Money` refuses floats and its schema tells clients to send a string, so this fails at the boundary instead of somewhere in the arithmetic.
+A JSON number becomes a Python float, and 99.10 as a float is not 99.10. `Money` refuses floats and any string that is not an amount with two decimals, such as `1e5`, and its schema tells clients to send a string. So a bad value fails at the boundary instead of somewhere in the arithmetic.
 
 ## The workbook is a file
 
