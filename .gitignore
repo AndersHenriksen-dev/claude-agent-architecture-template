@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+dist/
+build/
+*.egg-info/
+
+# Secrets
+.env
+
+# What a run writes: the tags, the summary and the audit log
+workspace/
+
+# Personal Claude Code settings
+.claude/settings.local.json
+CLAUDE.local.md
+
+# Editors
+.vscode/
+.idea/

@@ -1,0 +1,4 @@
+title = "claude-agent-architecture-template"
+
+[extend]
+useDefault = true

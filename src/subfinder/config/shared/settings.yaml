@@ -1,0 +1,11 @@
+# The model for paid calls. Override with SUBFINDER_MODEL.
+model: claude-sonnet-5-5
+
+# USD per million tokens, used only to print what a paid run cost.
+prices:
+  claude-opus-5-5: { input: 4.00, output: 20.00 }
+  claude-sonnet-5-5: { input: 2.00, output: 10.00 }
+  claude-haiku-5-5: { input: 0.10, output: 0.50 }
+
+# Relative to the repo root. Git-ignored.
+workspace_dir: workspace
