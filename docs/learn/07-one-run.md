@@ -19,7 +19,7 @@ The right answer is four active subscriptions, worth 506.00 a month: CloudVault 
 
 You type `/find-subscriptions`, or ask "what subscriptions do I have?".
 
-1. **At launch.** Claude Code reads `CLAUDE.md` and `no-advice.md`. It lists the skill's description. It starts the MCP server, after you have approved it, and offers its tools.
+1. **At launch.** Claude Code reads your `~/.claude/CLAUDE.md` and any `CLAUDE.local.md` if you have them, the root `CLAUDE.md` and `no-advice.md`. It merges your settings files with `.claude/settings.json`, which brings in the hooks. It lists the skill's description. It starts the MCP server, after you have approved it, and offers its tools. `lib/hooks/CLAUDE.md` and `money.md` stay out of context until a file they cover is touched.
 2. **The skill loads.** The body of `SKILL.md` enters context, and its `allowed-tools` pre-approves the five tools for that turn.
 3. **Read.** The model calls `mcp__subfinder__list_transactions`. No `PreToolUse` check applies. `PostToolUse` logs it.
 4. **Think.** The model groups the lines by what they mean. This is the part that needs a model.

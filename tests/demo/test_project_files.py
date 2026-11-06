@@ -4,12 +4,19 @@ from __future__ import annotations
 
 import ast
 import re
+import subprocess
 from pathlib import Path
 
 import anyio
 import pytest
 
-from subfinder.lib.demo.project_files import read_frontmatter, rule_applies_to, rule_files, skill_files
+from subfinder.lib.demo.project_files import (
+    read_frontmatter,
+    rule_applies_to,
+    rule_files,
+    skill_files,
+    subfolder_instruction_files,
+)
 from subfinder.lib.mcp_server.server import build_server
 from subfinder.lib.shared.settings import REPO_ROOT
 from subfinder.lib.statement.workbook import Summary
@@ -52,6 +59,31 @@ class TestRules:
             names = {node.id for node in ast.walk(tree) if isinstance(node, ast.Name)}
             # transactions.py names float once: the validator that refuses it.
             assert "float" not in names or path.name == "transactions.py", path
+
+
+class TestInstructionAndSettingsFiles:
+    def _ignored(self, name: str) -> bool:
+        check = ["git", "check-ignore", "--quiet", "--no-index", name]
+        return subprocess.run(check, cwd=REPO_ROOT, check=False).returncode == 0
+
+    @pytest.mark.parametrize("name", ["CLAUDE.local.md", ".claude/settings.local.json", ".env", "workspace/x"])
+    def test_personal_files_stay_out_of_git(self, name: str) -> None:
+        assert self._ignored(name)
+
+    @pytest.mark.parametrize("name", ["CLAUDE.md", ".claude/settings.json", ".mcp.json", ".claude/rules/money.md"])
+    def test_shared_files_are_not_ignored(self, name: str) -> None:
+        assert (REPO_ROOT / name).exists()
+        assert not self._ignored(name)
+
+    def test_the_subfolder_file_sits_beside_what_it_describes(self) -> None:
+        assert subfolder_instruction_files() == [REPO_ROOT / "src" / "subfinder" / "lib" / "hooks" / "CLAUDE.md"]
+        text = subfolder_instruction_files()[0].read_text(encoding="utf-8")
+        assert "`checks.py`" in text
+        assert (subfolder_instruction_files()[0].parent / "checks.py").exists()
+
+    @pytest.mark.parametrize("path", [REPO_ROOT / "CLAUDE.md", *subfolder_instruction_files()])
+    def test_keeps_to_the_documented_size(self, path: Path) -> None:
+        assert len(path.read_text(encoding="utf-8").splitlines()) < 200
 
 
 class TestSkill:

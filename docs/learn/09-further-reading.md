@@ -15,8 +15,10 @@ The docs change often, so read them over any summary, including this guide.
 - [Skill authoring best practices](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices): writing a description that fires.
 - [Equipping agents for the real world with Agent Skills](https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills): the design thinking behind them.
 
-## Hooks and permissions
+## Hooks, settings and permissions
 
+- [Settings files and precedence](https://code.claude.com/docs/en/settings): which file to use, who it affects, and which value wins.
+- [Claude directory reference](https://code.claude.com/docs/en/claude-directory): every file Claude Code reads.
 - [Hooks reference](https://code.claude.com/docs/en/hooks): every event, its JSON, and its decision fields.
 - [Hooks guide](https://code.claude.com/docs/en/hooks-guide): worked examples.
 - [Configure permissions](https://code.claude.com/docs/en/permissions): the evaluation order, and how hooks and rules interact.
